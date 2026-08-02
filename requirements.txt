@@ -1,0 +1,10 @@
+flask
+flask-cors
+langchain
+langchain-groq
+python-dotenv
+pillow
+pdf2image
+pytesseract
+gspread
+google-auth
