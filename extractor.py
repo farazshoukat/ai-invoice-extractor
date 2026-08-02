@@ -24,10 +24,19 @@ EXTRACTION_PROMPT = ChatPromptTemplate.from_messages(
         ("system", """You are an invoice/receipt data extraction assistant.
 Given raw OCR text from a receipt or invoice, extract the following fields as JSON:
 - vendor: the business/store name
-- date: the transaction date (as written)
+- date: the transaction/invoice date (as written)
 - total_amount: the total amount paid (number only, no currency symbol)
 - currency: the currency if identifiable (e.g. PKR, USD), else null
 - items: a list of line items, each with "description" and "amount" if identifiable (else empty list)
+
+IMPORTANT rules for line items:
+- Invoice tables often start each row with a serial/row number (1, 2, 3...) in its own column.
+  This is NOT part of the item description — ignore it and use only the actual item/description text.
+- OCR sometimes merges the serial number into the description (e.g. "i 10 Days" or "2 Steel Structure Installation 5 Weeks").
+  In that case, strip the leading number/stray character and reconstruct the real description.
+- Quantity/duration text (like "10 Days", "5 Weeks", "200 Cubics") is part of the item's detail, not the row number.
+- If a row shows unit price AND a total (e.g. "$100 $1,000"), use the LAST number as the item's amount (that's the line total).
+- Never invent items or amounts that aren't supported by the OCR text.
 
 Respond with ONLY valid JSON, no explanation, no markdown formatting.
 If a field cannot be determined, use null (or empty list for items)."""),
@@ -39,7 +48,7 @@ extraction_chain = EXTRACTION_PROMPT | llm | StrOutputParser()
 
 
 def extract_text(file_path: str) -> str:
-    """OCR: pulls raw text out of an image or PDF."""
+    """OCR: pulls raw text out of an image or PDF (no preprocessing — kept simple/reliable)."""
     if file_path.lower().endswith(".pdf"):
         pages = convert_from_path(file_path)
         text = ""
@@ -60,7 +69,6 @@ def extract_structured_data(file_path: str) -> dict:
 
     raw_json = extraction_chain.invoke({"ocr_text": ocr_text})
 
-    # Strip markdown fences if the model added them despite instructions
     cleaned = raw_json.strip().removeprefix("```json").removeprefix("```").removesuffix("```").strip()
 
     try:
