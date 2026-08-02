@@ -39,6 +39,15 @@ def extract():
     return jsonify({"status": "saved", "data": data})
 
 
+@app.route("/debug-env", methods=["GET"])
+def debug_env():
+    token_val = os.environ.get("GOOGLE_TOKEN_B64", "")
+    return jsonify({
+        "has_token_var": bool(token_val),
+        "token_length": len(token_val),
+    })
+
+
 @app.route("/health", methods=["GET"])
 def health():
     return jsonify({"status": "ok"})
