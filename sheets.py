@@ -1,5 +1,6 @@
 """Google Sheets integration — saves extracted invoice data via OAuth."""
 
+import base64
 import gspread
 from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import InstalledAppFlow
@@ -13,7 +14,20 @@ SCOPES = ["https://www.googleapis.com/auth/spreadsheets"]
 HEADERS = ["Vendor", "Date", "Total Amount", "Currency", "Item Description", "Item Amount"]
 
 
+def ensure_token_file():
+    """On Railway, recreate token.json from a base64 env var if it doesn't exist locally."""
+    if os.path.exists(OAUTH_TOKEN_FILE):
+        return
+
+    token_b64 = os.environ.get("GOOGLE_TOKEN_B64")
+    if token_b64:
+        os.makedirs(os.path.dirname(OAUTH_TOKEN_FILE), exist_ok=True)
+        with open(OAUTH_TOKEN_FILE, "wb") as f:
+            f.write(base64.b64decode(token_b64))
+
+
 def get_credentials():
+    ensure_token_file()
     creds = None
     if os.path.exists(OAUTH_TOKEN_FILE):
         creds = Credentials.from_authorized_user_file(OAUTH_TOKEN_FILE, SCOPES)
