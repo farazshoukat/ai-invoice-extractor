@@ -5,8 +5,7 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS
 
 from extractor import extract_structured_data
-from sheets import save_invoice, ensure_token_file
-from config import OAUTH_TOKEN_FILE
+from sheets import save_invoice
 
 app = Flask(__name__)
 CORS(app)
@@ -38,25 +37,6 @@ def extract():
         return jsonify({"error": f"Extraction succeeded but saving to Sheets failed: {exc}", "data": data}), 500
 
     return jsonify({"status": "saved", "data": data})
-
-
-@app.route("/debug-env", methods=["GET"])
-def debug_env():
-    token_val = os.environ.get("GOOGLE_TOKEN_B64", "")
-    result = {
-        "has_token_var": bool(token_val),
-        "token_length": len(token_val),
-        "token_file_exists_before": os.path.exists(OAUTH_TOKEN_FILE),
-    }
-
-    try:
-        ensure_token_file()
-        result["ensure_token_file_ran"] = True
-    except Exception as exc:  # noqa: BLE001
-        result["ensure_token_file_error"] = str(exc)
-
-    result["token_file_exists_after"] = os.path.exists(OAUTH_TOKEN_FILE)
-    return jsonify(result)
 
 
 @app.route("/health", methods=["GET"])
