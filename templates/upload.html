@@ -1,25 +1,26 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Upload Invoice</title>
-    <style>
-        body { font-family: Arial, sans-serif; background: #0f0f0f; color: #fff; padding: 30px; }
-        .box { background: #1a1a1a; padding: 30px; border-radius: 8px; max-width: 400px; }
-        input[type=file] { width: 100%; margin: 15px 0; color: #fff; }
-        button { padding: 10px 20px; background: #22c55e; border: none; border-radius: 4px; color: #000; font-weight: bold; cursor: pointer; }
-        .error { color: #ef4444; }
-        a { color: #888; text-decoration: none; }
-    </style>
-</head>
-<body>
-    <a href="{{ url_for('dashboard.view_dashboard') }}">&larr; Back to Dashboard</a>
-    <div class="box">
-        <h2>Upload Invoice / Receipt</h2>
-        {% if error %}<p class="error">{{ error }}</p>{% endif %}
-        <form method="POST" enctype="multipart/form-data">
-            <input type="file" name="file" accept=".jpg,.jpeg,.png,.pdf" required>
-            <button type="submit">Extract & Save</button>
-        </form>
-    </div>
-</body>
-</html>
+{% extends "base.html" %}
+{% block title %}Upload · Invoice Extractor{% endblock %}
+{% block body %}
+<div class="wrap">
+  <a class="back-link" href="{{ url_for('dashboard.view_dashboard') }}">&larr; Back to Dashboard</a>
+  <div class="upload-card">
+    <span class="stamp">Scan&nbsp;In</span>
+    <h2>Upload Invoice / Receipt</h2>
+    {% if error %}<div class="error-box">{{ error }}</div>{% endif %}
+    <form method="POST" enctype="multipart/form-data">
+      <label class="file-picker" id="picker">
+        <input type="file" name="file" id="fileInput" accept=".jpg,.jpeg,.png,.pdf" required>
+        <span id="fileLabel">Click to choose a file (JPG, PNG, PDF)</span>
+      </label>
+      <button type="submit">Extract &amp; Save</button>
+    </form>
+  </div>
+</div>
+<script>
+  const input = document.getElementById('fileInput');
+  const label = document.getElementById('fileLabel');
+  input.addEventListener('change', () => {
+    label.textContent = input.files.length ? input.files[0].name : "Click to choose a file (JPG, PNG, PDF)";
+  });
+</script>
+{% endblock %}
