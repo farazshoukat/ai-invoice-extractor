@@ -1,0 +1,33 @@
+from flask import Blueprint, render_template, request
+from db import get_conn
+
+dashboard = Blueprint("dashboard", __name__)
+
+@dashboard.route("/dashboard")
+def view_dashboard():
+    conn = get_conn()
+    cur = conn.cursor()
+
+    search = request.args.get("q", "")
+    cur.execute("""
+        SELECT id, vendor, invoice_date, amount FROM invoices
+        WHERE vendor ILIKE %s
+        ORDER BY invoice_date DESC
+        LIMIT 100
+    """, (f"%{search}%",))
+    rows = cur.fetchall()
+
+    cur.execute("SELECT COUNT(*), COALESCE(SUM(amount),0) FROM invoices")
+    total_count, total_amount = cur.fetchone()
+
+    cur.execute("""
+        SELECT vendor, COUNT(*) FROM invoices
+        GROUP BY vendor ORDER BY COUNT(*) DESC LIMIT 5
+    """)
+    top_vendors = cur.fetchall()
+
+    cur.close()
+    conn.close()
+    return render_template("dashboard.html",
+        invoices=rows, total_count=total_count,
+        total_amount=total_amount, top_vendors=top_vendors)

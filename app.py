@@ -1,14 +1,17 @@
-"""Flask API for the Invoice Extractor — upload, extract, and log to Google Sheets."""
+"""Flask API for the Invoice Extractor — upload, extract, and log to Google Sheets + Postgres."""
 
 import os
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 
 from extractor import extract_structured_data
-from sheets import save_invoice
+from sheets import save_invoice as save_to_sheets
+from db import save_invoice as save_to_db
+from dashboard import dashboard
 
 app = Flask(__name__)
 CORS(app)
+app.register_blueprint(dashboard)
 
 UPLOAD_DIR = "uploads"
 os.makedirs(UPLOAD_DIR, exist_ok=True)
@@ -31,10 +34,17 @@ def extract():
     except Exception as exc:  # noqa: BLE001
         return jsonify({"error": f"Extraction failed: {exc}"}), 500
 
+    # Save to Postgres (Supabase) — primary store for dashboard
     try:
-        save_invoice(data)
+        save_to_db(data)
     except Exception as exc:  # noqa: BLE001
-        return jsonify({"error": f"Extraction succeeded but saving to Sheets failed: {exc}", "data": data}), 500
+        return jsonify({"error": f"Extraction succeeded but saving to database failed: {exc}", "data": data}), 500
+
+    # Save to Google Sheets — kept as secondary/backup log
+    try:
+        save_to_sheets(data)
+    except Exception as exc:  # noqa: BLE001
+        print(f"Sheets write failed (non-fatal): {exc}")
 
     return jsonify({"status": "saved", "data": data})
 
