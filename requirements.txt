@@ -9,4 +9,4 @@ pytesseract
 gspread
 google-auth
 google-auth-oauthlib
-psycopg2-binary
+psycopg2-binarypsycopg2-binary

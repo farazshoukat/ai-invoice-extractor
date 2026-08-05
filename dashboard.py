@@ -1,10 +1,13 @@
-from flask import Blueprint, render_template, request
+from flask import Blueprint, render_template, request, session, redirect, url_for
 from db import get_conn
 
 dashboard = Blueprint("dashboard", __name__)
 
 @dashboard.route("/dashboard")
 def view_dashboard():
+    if "user_id" not in session:
+        return redirect(url_for("login"))
+
     conn = get_conn()
     cur = conn.cursor()
 
@@ -30,4 +33,5 @@ def view_dashboard():
     conn.close()
     return render_template("dashboard.html",
         invoices=rows, total_count=total_count,
-        total_amount=total_amount, top_vendors=top_vendors)
+        total_amount=total_amount, top_vendors=top_vendors,
+        email=session.get("email"))

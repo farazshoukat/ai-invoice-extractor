@@ -5,7 +5,6 @@ def get_conn():
     return psycopg2.connect(os.environ["DATABASE_URL"])
 
 def format_items(items: list) -> str:
-    """Convert items list into a readable, comma-separated string."""
     if not items:
         return ""
     lines = []
@@ -18,19 +17,20 @@ def format_items(items: list) -> str:
             lines.append(desc)
     return "; ".join(lines)
 
-def save_invoice(data: dict):
+def save_invoice(data: dict, company_id: str = None):
     conn = get_conn()
     cur = conn.cursor()
     cur.execute("""
-        INSERT INTO invoices (vendor, invoice_date, amount, items, raw_text, file_url)
-        VALUES (%s, %s, %s, %s, %s, %s)
+        INSERT INTO invoices (vendor, invoice_date, amount, items, raw_text, file_url, company_id)
+        VALUES (%s, %s, %s, %s, %s, %s, %s)
     """, (
         data.get("vendor"),
         data.get("date"),
         data.get("total_amount"),
         format_items(data.get("items", [])),
         data.get("ocr_text_preview"),
-        None
+        None,
+        company_id
     ))
     conn.commit()
     cur.close()

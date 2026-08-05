@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Upload Invoice</title>
+    <style>
+        body { font-family: Arial, sans-serif; background: #0f0f0f; color: #fff; padding: 30px; }
+        .box { background: #1a1a1a; padding: 30px; border-radius: 8px; max-width: 400px; }
+        input[type=file] { width: 100%; margin: 15px 0; color: #fff; }
+        button { padding: 10px 20px; background: #22c55e; border: none; border-radius: 4px; color: #000; font-weight: bold; cursor: pointer; }
+        .error { color: #ef4444; }
+        a { color: #888; text-decoration: none; }
+    </style>
+</head>
+<body>
+    <a href="{{ url_for('dashboard.view_dashboard') }}">&larr; Back to Dashboard</a>
+    <div class="box">
+        <h2>Upload Invoice / Receipt</h2>
+        {% if error %}<p class="error">{{ error }}</p>{% endif %}
+        <form method="POST" enctype="multipart/form-data">
+            <input type="file" name="file" accept=".jpg,.jpeg,.png,.pdf" required>
+            <button type="submit">Extract & Save</button>
+        </form>
+    </div>
+</body>
+</html>
