@@ -13,7 +13,7 @@ def view_dashboard():
 
     search = request.args.get("q", "")
     cur.execute("""
-        SELECT id, vendor, invoice_date, amount FROM invoices
+        SELECT id, vendor, invoice_date, amount, items FROM invoices
         WHERE vendor ILIKE %s
         ORDER BY invoice_date DESC
         LIMIT 100
@@ -35,3 +35,16 @@ def view_dashboard():
         invoices=rows, total_count=total_count,
         total_amount=total_amount, top_vendors=top_vendors,
         email=session.get("email"))
+
+
+@dashboard.route("/invoice/<int:invoice_id>/delete", methods=["POST"])
+def delete_invoice(invoice_id):
+    if "user_id" not in session:
+        return redirect(url_for("login"))
+    conn = get_conn()
+    cur = conn.cursor()
+    cur.execute("DELETE FROM invoices WHERE id = %s", (invoice_id,))
+    conn.commit()
+    cur.close()
+    conn.close()
+    return redirect(url_for("dashboard.view_dashboard"))

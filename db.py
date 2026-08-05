@@ -19,7 +19,6 @@ def format_items(items: list) -> str:
     return "; ".join(lines)
 
 def parse_date(date_str):
-    """Try common date formats; return None if unparseable."""
     if not date_str:
         return None
     formats = ["%d/%m/%Y", "%m/%d/%Y", "%Y-%m-%d", "%d-%m-%Y", "%B %d, %Y", "%d %B %Y"]

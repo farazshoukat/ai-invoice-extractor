@@ -35,7 +35,7 @@
   {% if invoices %}
   <table>
     <thead>
-      <tr><th>ID</th><th>Vendor</th><th>Date</th><th style="text-align:right">Amount</th></tr>
+      <tr><th>ID</th><th>Vendor</th><th>Date</th><th>Items</th><th style="text-align:right">Amount</th><th></th></tr>
     </thead>
     <tbody>
       {% for row in invoices %}
@@ -43,7 +43,13 @@
         <td class="id">#{{ row[0] }}</td>
         <td>{{ row[1] }}</td>
         <td class="date">{{ row[2] or "N/A" }}</td>
+        <td style="font-size:0.8rem; color:var(--ink-soft);">{{ row[4] or "—" }}</td>
         <td class="amount">${{ "%.2f"|format(row[3]) if row[3] is not none else "0.00" }}</td>
+        <td>
+          <form method="POST" action="{{ url_for('dashboard.delete_invoice', invoice_id=row[0]) }}" onsubmit="return confirm('Delete this invoice?');">
+            <button type="submit" style="background:none;border:none;color:var(--stamp-red);cursor:pointer;font-size:0.8rem;">Delete</button>
+          </form>
+        </td>
       </tr>
       {% endfor %}
     </tbody>
