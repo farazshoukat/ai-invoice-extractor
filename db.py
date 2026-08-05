@@ -29,11 +29,11 @@ def parse_date(date_str):
             continue
     return None
 
-def save_invoice(data: dict, company_id: str = None):
+def save_invoice(data: dict, user_id: str = None):
     conn = get_conn()
     cur = conn.cursor()
     cur.execute("""
-        INSERT INTO invoices (vendor, invoice_date, amount, items, raw_text, file_url, company_id)
+        INSERT INTO invoices (vendor, invoice_date, amount, items, raw_text, file_url, user_id)
         VALUES (%s, %s, %s, %s, %s, %s, %s)
     """, (
         data.get("vendor"),
@@ -42,7 +42,7 @@ def save_invoice(data: dict, company_id: str = None):
         format_items(data.get("items", [])),
         data.get("ocr_text_preview"),
         None,
-        company_id
+        user_id
     ))
     conn.commit()
     cur.close()

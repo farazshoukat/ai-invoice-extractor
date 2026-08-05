@@ -89,7 +89,7 @@ def upload():
         return render_template("upload.html", error=f"Extraction failed: {exc}")
 
     try:
-        save_to_db(data)
+        save_to_db(data, user_id=session["user_id"])
     except Exception as exc:
         return render_template("upload.html", error=f"Database save failed: {exc}")
 
@@ -121,7 +121,7 @@ def extract():
         return jsonify({"error": f"Extraction failed: {exc}"}), 500
 
     try:
-        save_to_db(data)
+        save_to_db(data, user_id=session["user_id"])
     except Exception as exc:
         return jsonify({"error": f"Extraction succeeded but saving to database failed: {exc}", "data": data}), 500
 
